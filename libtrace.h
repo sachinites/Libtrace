@@ -34,9 +34,15 @@
 #define __LIBTRACE__
 
 #include <stdio.h>
-#include "bitsop.h"
 #include <stdlib.h>
 #include <memory.h>
+
+#define TR_IS_BIT_SET(n, pos)  ((n & (1 << (pos))) != 0)
+#define TR_TOGGLE_BIT(n, pos)  (n = n ^ (1 << (pos)))
+#define TR_COMPLEMENT(num)     (num = num ^ 0xFFFFFFFFFFFFFFFF)
+#define TR_UNSET_BIT(n, pos)   (n = n & ((1 << pos) ^ 0xFFFFFFFFFFFFFFFF))
+#define TR_SET_BIT(n, pos)     (n = n | 1 << pos)
+
 
 typedef enum{
     FALSE,
@@ -62,7 +68,7 @@ init_trace(traceoptions *traceopts){
 
 #define TRACE(traceopts_ptr, bit)                                               \
     if((traceopts_ptr)->enable == TRUE){                                        \
-        if(IS_BIT_SET((traceopts_ptr)->bit_mask, bit)){                         \
+        if(TR_IS_BIT_SET((traceopts_ptr)->bit_mask, bit)){                         \
             printf("%s(%d) : %s\n", __FUNCTION__, __LINE__, (traceopts_ptr)->b);\
             memset((traceopts_ptr)->b, 0, 256);                                 \
         }                                                                       \
@@ -71,12 +77,12 @@ init_trace(traceoptions *traceopts){
 
 static inline void
 enable_trace_event(traceoptions *traceopts, unsigned long long bit){
-    SET_BIT(traceopts->bit_mask, bit);
+    TR_SET_BIT(traceopts->bit_mask, bit);
 }
 
 static inline void
 disable_trace_event(traceoptions *traceopts, unsigned long long bit){
-    UNSET_BIT(traceopts->bit_mask, bit);
+    TR_UNSET_BIT(traceopts->bit_mask, bit);
 }
 
 
